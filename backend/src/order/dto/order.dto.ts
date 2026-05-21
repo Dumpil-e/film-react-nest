@@ -6,6 +6,8 @@ import {
   IsArray,
   ArrayMinSize,
   Min,
+  IsOptional,
+  IsDateString,
 } from 'class-validator';
 
 export class OrderResultDto {
@@ -25,6 +27,10 @@ export class CreateOrderDto {
   @IsUUID(4, { message: 'ID сеанса должен быть UUID' })
   session: string;
 
+  @IsOptional()
+  @IsDateString()
+  daytime?: string;
+
   @IsNumber({}, { message: 'Ряд должен быть числом' })
   @Min(1, { message: 'Ряд не может быть меньше 1' })
   row: number;
@@ -33,6 +39,7 @@ export class CreateOrderDto {
   @Min(1, { message: 'Место не может быть меньше 1' })
   seat: number;
 
+  @IsOptional()
   @IsNumber({}, { message: 'Цена должна быть числом' })
   price: number;
 }

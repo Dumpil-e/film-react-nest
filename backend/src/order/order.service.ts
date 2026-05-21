@@ -33,7 +33,6 @@ export class OrderService {
     const results: OrderResultDto[] = [];
 
     for (const dto of dtos) {
-      // Запрещаем бронировать разные сеансы в одном запросе
       if (dto.film !== dtos[0].film || dto.session !== dtos[0].session) {
         throw new BadRequestException(
           'Все кресла должны относиться к одному сеансу',
@@ -51,10 +50,10 @@ export class OrderService {
       results.push({
         film: dto.film,
         session: dto.session,
-        daytime: String(session.daytime),
+        daytime: session.daytime.toISOString(),
         row: dto.row,
         seat: dto.seat,
-        price: session.price,
+        price: dto.price ?? session.price,
         id: randomUUID(),
       });
     }

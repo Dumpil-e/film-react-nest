@@ -37,8 +37,8 @@ export class FilmsService {
 
     const items = schedule.map((item) => ({
       id: item.id,
-      daytime: String(item.daytime),
-      hall: String(item.hall),
+      daytime: item.daytime.toISOString(),
+      hall: item.hall,
       rows: item.rows,
       seats: item.seats,
       price: item.price,
