@@ -30,6 +30,10 @@ export class OrderService {
       throw new NotFoundException('Сеанс не найден');
     }
 
+    if (!session.taken) {
+      session.taken = [];
+    }
+
     const results: OrderResultDto[] = [];
 
     for (const dto of dtos) {
@@ -50,7 +54,7 @@ export class OrderService {
       results.push({
         film: dto.film,
         session: dto.session,
-        daytime: session.daytime.toISOString(),
+        daytime: new Date(session.daytime).toISOString(),
         row: dto.row,
         seat: dto.seat,
         price: dto.price ?? session.price,
