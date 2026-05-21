@@ -16,8 +16,10 @@ export class OrderService {
   async createOrder(
     dtos: CreateOrderDto[],
   ): Promise<ListResponseDto<OrderResultDto>> {
-    if (!dtos.length) {
-      throw new BadRequestException('Список заказов пуст');
+    if (!Array.isArray(dtos) || dtos.length === 0) {
+      throw new BadRequestException(
+        'Список заказов пуст или имеет неверный формат',
+      );
     }
 
     const film = await this.filmRepository.findById(dtos[0].film);
