@@ -18,7 +18,7 @@ export class Schedule {
   @Column({ type: 'int' })
   seats: number;
 
-  @Column({ type: 'int' })
+  @Column({ type: 'float' })
   price: number;
 
   @Column({ type: 'simple-array', default: '' })

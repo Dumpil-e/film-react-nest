@@ -14,11 +14,11 @@ export class TypeOrmFilmRepository extends FilmRepository {
   }
 
   async findAll(): Promise<FilmListDTO[]> {
-    const films = await this.filmRepository.find({
-      order: { title: 'ASC' },
+    const films = await this.filmRepository.find({ order: { title: 'ASC' } });
+    return films.map((film) => {
+      const { schedule: _schedule, ...rest } = film;
+      return rest;
     });
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    return films.map(({ schedule, ...rest }) => rest);
   }
 
   async findById(id: string): Promise<FilmWithScheduleDTO | null> {
@@ -55,8 +55,7 @@ export class TypeOrmFilmRepository extends FilmRepository {
       throw new NotFoundException(`Фильм с ID ${filmDto.id} не найден`);
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { schedule, id, ...filmData } = filmDto;
+    const { schedule: _schedule, id: _id, ...filmData } = filmDto;
     Object.assign(entity, filmData);
 
     filmDto.schedule.forEach((dtoSchedule) => {

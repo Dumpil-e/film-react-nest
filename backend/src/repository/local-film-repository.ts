@@ -24,8 +24,7 @@ export class LocalFilmRepository extends FilmRepository {
   }
 
   async findAll(): Promise<FilmListDTO[]> {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    return this.films.map(({ schedule, ...rest }) => rest);
+    return this.films.map(({ schedule: _schedule, ...rest }) => rest);
   }
 
   async findById(id: string): Promise<FilmWithScheduleDTO | null> {

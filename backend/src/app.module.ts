@@ -3,10 +3,6 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as path from 'node:path';
-
-import { Film } from './films/entities/film.entity';
-import { Schedule } from './films/entities/schedule.entity';
-
 import { configProvider } from './app.config.provider';
 import { FilmsModule } from './films/films.module';
 import { OrderModule } from './order/order.module';
@@ -30,8 +26,8 @@ import { OrderModule } from './order/order.module';
         username: config.get<string>('DB_USERNAME'),
         password: config.get<string>('DB_PASSWORD'),
         database: config.get<string>('DB_DATABASE'),
-        entities: [Film, Schedule],
-        synchronize: false,
+        entities: [path.join(__dirname, '**', '*.entity.{ts,js}')],
+        synchronize: config.get<string>('NODE_ENV') !== 'production',
       }),
     }),
     FilmsModule,
