@@ -1,7 +1,7 @@
-import { Film } from '../films/schemas/film.schema';
+import { FilmListDTO, FilmWithScheduleDTO } from '../films/dto/films.dto';
 
 export abstract class FilmRepository {
-  abstract findAll(): Promise<Film[]>;
-  abstract findById(id: string): Promise<Film | null>;
-  abstract update(film: Film): Promise<Film>;
+  abstract findAll(): Promise<FilmListDTO[]>;
+  abstract findById(id: string): Promise<FilmWithScheduleDTO | null>;
+  abstract update(film: FilmWithScheduleDTO): Promise<FilmWithScheduleDTO>;
 }

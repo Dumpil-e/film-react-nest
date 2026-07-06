@@ -1,47 +1,44 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { FilmRepository } from './film-repository';
-import { Film } from '../films/schemas/film.schema';
+import { FilmListDTO, FilmWithScheduleDTO } from '../films/dto/films.dto';
 import * as fs from 'fs';
 import * as path from 'path';
 
+type RawFilmJson = FilmWithScheduleDTO;
+
 @Injectable()
 export class LocalFilmRepository extends FilmRepository {
-  private films: Film[];
+  private films: FilmWithScheduleDTO[];
 
   constructor() {
     super();
-
     const filePath = path.join(
       __dirname,
       '../../test/mongodb_initial_stub.json',
     );
-    const rawData = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
 
-    this.films = (rawData as any[]).map((film: any) => ({
-      ...film,
-      schedule: film.schedule.map((s: any) => ({
-        ...s,
-        daytime: new Date(s.daytime),
-      })),
-    }));
+    const rawData: RawFilmJson[] = JSON.parse(
+      fs.readFileSync(filePath, 'utf-8'),
+    );
+    this.films = rawData;
   }
 
-  async findAll(): Promise<Film[]> {
-    return this.films;
+  async findAll(): Promise<FilmListDTO[]> {
+    return this.films.map(({ schedule: _schedule, ...rest }) => rest);
   }
 
-  async findById(id: string): Promise<Film | null> {
-    const film = this.films.find((f) => f.id === id);
-    return film || null;
+  async findById(id: string): Promise<FilmWithScheduleDTO | null> {
+    return this.films.find((f) => f.id === id) || null;
   }
 
-  async update(film: Film): Promise<Film> {
-    const index = this.films.findIndex((f) => f.id === film.id);
+  async update(filmDto: FilmWithScheduleDTO): Promise<FilmWithScheduleDTO> {
+    const index = this.films.findIndex((f) => f.id === filmDto.id);
+
     if (index === -1) {
-      throw new NotFoundException(`Фильм с id ${film.id} не найден`);
+      throw new NotFoundException(`Фильм с ID ${filmDto.id} не найден`);
     }
+    this.films[index] = filmDto;
 
-    this.films[index] = film;
-    return this.films[index];
+    return filmDto;
   }
 }

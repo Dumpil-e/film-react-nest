@@ -73,3 +73,7 @@ export class ScheduleDTO {
   @IsString({ each: true })
   taken: string[];
 }
+
+export interface FilmWithScheduleDTO extends FilmListDTO {
+  schedule: ScheduleDTO[];
+}
