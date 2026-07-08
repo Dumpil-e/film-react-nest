@@ -1,0 +1,111 @@
+services:
+  #База данных
+  postgres:
+    image: postgres:15-alpine
+    container_name: film-postgres
+    environment:
+      POSTGRES_USER: student
+      POSTGRES_PASSWORD: student
+      POSTGRES_DB: nest_project
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U student -d nest_project"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  #Админка для БД
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: film-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "8080:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - app-network
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  #Бэкенд
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: film-backend
+    image: ghcr.io/dumpil-e/film-backend:latest
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: nest_project
+      DB_USERNAME: student
+      DB_PASSWORD: student
+      NODE_ENV: production
+      PORT: 3000
+      LOGGER_TYPE: json
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  #Фронтенд (сборщик статики)
+  frontend-build:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=/api/afisha
+        - VITE_CDN_URL=/content/afisha
+    environment:
+      - VITE_API_URL=/api/afisha
+      - VITE_CDN_URL=/content/afisha
+    depends_on:
+      - backend
+    container_name: film-frontend-builder
+    image: ghcr.io/dumpil-e/film-frontend:latest
+    volumes:
+      - frontend_dist:/dist
+    networks:
+      - app-network
+
+  #Nginx
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: film-nginx
+    image: ghcr.io/dumpil-e/film-nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - frontend_dist:/usr/share/nginx/html
+    depends_on:
+      backend:
+        condition: service_started
+      frontend-build:
+        # Ждём, пока сборщик фронтенда полностью отработает и завершится с кодом 0
+        condition: service_completed_successfully
+    networks:
+      - app-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  pgadmin_data:
+  frontend_dist:
+
+networks:
+  app-network:
+    driver: bridge
