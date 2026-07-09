@@ -1,5 +1,7 @@
 # FILM!
 
+Доступен по адреса - http://dikino.nomorepartiessite.ru/
+
 ## Установка
 
 ### MongoDB
